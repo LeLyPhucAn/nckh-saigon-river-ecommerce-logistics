@@ -1,0 +1,9 @@
+﻿hub_id,hub_name,segment_id,district,dist_to_cbd_km,est_land_rent_vnd_m2,ris_readiness_score,d_plus,d_minus,closeness_coefficient,rank
+HUB06,Bến Tân Cảng,SEG2,Bình Thạnh,3.5,380000,5.0,0.0485,0.0781,0.617,1
+HUB07,Bến Ba Son,SEG3,Quận 1,1.5,550000,5.0,0.0582,0.0823,0.5859,2
+HUB05,Bến Bình An,SEG2,TP. Thủ Đức,3.8,320000,4.8,0.0523,0.0703,0.5734,3
+HUB03,Bến Thanh Đa,SEG1,Bình Thạnh,6.4,190000,4.0,0.0639,0.0826,0.5637,4
+HUB08,Bến Bạch Đằng - Khánh Hội,SEG3,Quận 1 - Quận 4,0.8,650000,5.0,0.0722,0.0856,0.5424,5
+HUB04,Bến Thảo Điền,SEG2,TP. Thủ Đức,5.2,350000,4.5,0.0596,0.0636,0.516,6
+HUB01,Bến Hiệp Bình Chánh,SEG1,TP. Thủ Đức,8.2,180000,4.5,0.0829,0.073,0.4681,7
+HUB02,Bến Bình Lợi,SEG1,Bình Thạnh,7.1,220000,4.0,0.087,0.0655,0.4293,8

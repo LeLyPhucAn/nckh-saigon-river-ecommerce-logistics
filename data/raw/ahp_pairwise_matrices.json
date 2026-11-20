@@ -1,0 +1,56 @@
+{
+  "description": "Fuzzy AHP Pairwise Comparison Matrices for Saigon River E-commerce Logistics",
+  "methodology": "Chang (1996) Extent Analysis & Saaty Geometric Mean, verified CR < 0.10",
+  "groups": {
+    "labels": ["NAV", "ECO", "FIN", "ENV", "SOC_BEH"],
+    "matrix": [
+      [1.0, 0.5, 0.5, 3.0, 2.0],
+      [2.0, 1.0, 1.0, 4.0, 3.0],
+      [2.0, 1.0, 1.0, 3.0, 3.0],
+      [0.3333, 0.25, 0.3333, 1.0, 0.5],
+      [0.5, 0.3333, 0.3333, 2.0, 1.0]
+    ]
+  },
+  "subcriteria": {
+    "NAV": {
+      "labels": ["NAV1", "NAV2", "NAV3"],
+      "matrix": [
+        [1.0, 3.0, 2.0],
+        [0.3333, 1.0, 0.5],
+        [0.5, 2.0, 1.0]
+      ]
+    },
+    "ECO": {
+      "labels": ["ECO1", "ECO2", "ECO3"],
+      "matrix": [
+        [1.0, 2.0, 3.0],
+        [0.5, 1.0, 2.0],
+        [0.3333, 0.5, 1.0]
+      ]
+    },
+    "FIN": {
+      "labels": ["FIN1", "FIN2", "FIN3"],
+      "matrix": [
+        [1.0, 2.0, 3.0],
+        [0.5, 1.0, 2.0],
+        [0.3333, 0.5, 1.0]
+      ]
+    },
+    "ENV": {
+      "labels": ["ENV1", "ENV2", "ENV3"],
+      "matrix": [
+        [1.0, 2.0, 3.0],
+        [0.5, 1.0, 2.0],
+        [0.3333, 0.5, 1.0]
+      ]
+    },
+    "SOC_BEH": {
+      "labels": ["BEH1", "BEH2", "SOC1"],
+      "matrix": [
+        [1.0, 0.5, 2.0],
+        [2.0, 1.0, 3.0],
+        [0.5, 0.3333, 1.0]
+      ]
+    }
+  }
+}

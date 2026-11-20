@@ -1,0 +1,4 @@
+segment_id,segment_name,start_point,end_point,length_km,avg_depth_m,num_bridges,min_bridge_clearance_m,role
+SEG1,Đoạn 1: Cửa ngõ gom hàng Đông Bắc (Hiệp Bình Chánh - Thanh Đa),Cầu Bình Lợi (Hiệp Bình Chánh),Bán đảo Thanh Đa (Kênh Thanh Đa),5.8,8.0,2,7.0,Consolidation & Inbound Gateway from Binh Duong/Thu Duc Warehouses
+SEG2,Đoạn 2: Đô thị chuyển tiếp mật độ cao (Thảo Điền - Tân Cảng),Bán đảo Thanh Đa,Cầu Sài Gòn / Tân Cảng,4.6,9.5,1,10.0,High-density Residential & Premium Demand Zone (B2C & C2C)
+SEG3,Đoạn 3: Lõi trung tâm tiêu thụ (Ba Son - Bạch Đằng - Khánh Hội),Tân Cảng,Bến Bạch Đằng / Cầu Khánh Hội,3.8,11.0,2,10.0,Central Business District & Last-Mile Electric Distribution Core

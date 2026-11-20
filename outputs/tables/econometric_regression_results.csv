@@ -1,0 +1,7 @@
+﻿Variable,B (Unstandardized),Std. Error,Beta (Standardized),t-Statistic,Sig. (p-value),VIF
+(Constant),14.7378,13.8417,-,1.065,0.2985,-
+pop_density_k_per_km2 (X1),0.4285,0.0751,0.3359,5.708,0.0,3.32
+dist_to_hub_km (X2),-8.606,2.0157,-0.4578,-4.27,0.0003,11.03
+land_rent_mil_vnd_m2 (X3),24.2032,10.3887,0.2088,2.33,0.0294,7.71
+road_ris_score (X4),7.885,2.736,0.2262,2.882,0.0087,5.91
+est_saving_pct (X5),0.2075,0.5901,0.0667,0.352,0.7285,34.49
