@@ -1,16 +1,16 @@
 ﻿indicator_code,indicator_name,group_code,direction,group_weight,local_weight,global_weight
-NAV1,Tinh khong cau & Do sau luong,NAV,+,0.1862,0.5396,0.1005
-NAV2,Mat do cau ben tiep can,NAV,+,0.1862,0.1634,0.0304
-NAV3,Ha tang so RIS & Dien bien,NAV,+,0.1862,0.297,0.0553
-ECO1,Mat do dan cu & Chung cu,ECO,+,0.3242,0.5396,0.1749
-ECO2,Khoang cach toi kho tong,ECO,-,0.3242,0.297,0.0963
-ECO3,Ket noi mang luoi duong bo,ECO,+,0.3242,0.1634,0.053
-FIN1,Gia thue mat bang ben ven song,FIN,-,0.306,0.5396,0.1651
-FIN2,Chi phi van hanh tau dien/hybrid,FIN,-,0.306,0.297,0.0909
-FIN3,Chi phi boc xep tai Micro-Hub,FIN,-,0.306,0.1634,0.05
-ENV1,Tiem nang giam phat thai CO2,ENV,+,0.073,0.5396,0.0394
-ENV2,Giam tai diem nong un tac,ENV,+,0.073,0.297,0.0217
-ENV3,Rui ro sat lo & Song tau,ENV,-,0.073,0.1634,0.0119
-BEH1,Thai do ung ho logistics xanh,SOC_BEH,+,0.1106,0.297,0.0329
-BEH2,San sang chuyen doi cua 3PL/Shop,SOC_BEH,+,0.1106,0.5396,0.0597
-SOC1,Xung dot giao thong thuy & Rui ro,SOC_BEH,-,0.1106,0.1634,0.0181
+NAV1,Tĩnh không cầu & Độ sâu luồng,NAV,+,0.1862,0.5396,0.1005
+NAV2,Mật độ cầu bến tiếp cận,NAV,+,0.1862,0.1634,0.0304
+NAV3,Hạ tầng số RIS & Viễn thông,NAV,+,0.1862,0.297,0.0553
+ECO1,Mật độ dân cư & Chung cư,ECO,+,0.3242,0.5396,0.1749
+ECO2,Khoảng cách tới kho tổng,ECO,-,0.3242,0.297,0.0963
+ECO3,Kết nối mạng lưới đường bộ,ECO,+,0.3242,0.1634,0.053
+FIN1,Giá thuê mặt bằng ven sông,FIN,-,0.306,0.5396,0.1651
+FIN2,Chi phí vận hành tàu điện/hybrid,FIN,-,0.306,0.297,0.0909
+FIN3,Chi phí bốc xếp tại Micro-Hub,FIN,-,0.306,0.1634,0.05
+ENV1,Tiềm năng giảm phát thải CO2,ENV,+,0.073,0.5396,0.0394
+ENV2,Giảm tải điểm nóng ùn tắc,ENV,+,0.073,0.297,0.0217
+ENV3,Rủi ro sạt lở & Sóng tàu,ENV,-,0.073,0.1634,0.0119
+BEH1,Thái độ ủng hộ logistics xanh,SOC_BEH,+,0.1106,0.297,0.0329
+BEH2,Sẵn sàng chuyển đổi của 3PL/Shop,SOC_BEH,+,0.1106,0.5396,0.0597
+SOC1,Xung đột giao thông thủy & Rủi ro,SOC_BEH,-,0.1106,0.1634,0.0181

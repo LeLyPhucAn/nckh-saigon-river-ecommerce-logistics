@@ -1,8 +1,8 @@
 """
-Ward-Level Econometric Regression Model.
-Performs OLS multiple linear regression across 28 riverine wards, computes R²,
-Adjusted R², F-statistic, Beta coefficients, p-values, and VIF collinearity diagnostics.
-Exports formatted dataset and IBM SPSS Statistics syntax (.sps).
+Mô hình hồi quy kinh tế lượng cấp phường (Giai đoạn 3).
+Ước lượng OLS trên 28 phường ven sông Sài Gòn.
+Tính R², R² hiệu chỉnh, F-statistic, hệ số Beta, kiểm định VIF (< 2.0).
+Tự động xuất tệp cú pháp IBM SPSS Statistics (.sps).
 """
 
 from dataclasses import dataclass
@@ -11,13 +11,14 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 from scipy import stats
+
 from src.config import SPSS_DIR
 from src.data_loaders.ward_loader import load_ward_socioeconomic_data
 
 
 @dataclass
 class RegressionResult:
-    """Encapsulates output of econometric regression."""
+    """Đóng gói kết quả ước lượng hồi quy kinh tế lượng."""
     model_metrics: Dict[str, float]
     coefficients_df: pd.DataFrame
     processed_ward_df: pd.DataFrame
@@ -25,17 +26,20 @@ class RegressionResult:
 
 
 class WardEconometricModel:
-    """Spatial-economic OLS regression model for 28 wards."""
+    """Mô hình hồi quy tuyến tính bội OLS cho 28 phường ven sông."""
 
-    def __init__(self, raw_ward_df: Optional[pd.DataFrame] = None):
-        self.ward_df = raw_ward_df if raw_ward_df is not None else load_ward_socioeconomic_data()
+    def __init__(self, raw_ward_df: Optional[pd.DataFrame] = None) -> None:
+        self.ward_df = (
+            raw_ward_df if raw_ward_df is not None
+            else load_ward_socioeconomic_data()
+        )
 
     def fit(self, random_seed: int = 42) -> RegressionResult:
-        """Estimates OLS regression and generates collinearity diagnostics."""
+        """Ước lượng hồi quy OLS và kiểm định đa cộng tuyến."""
         np.random.seed(random_seed)
         df = self.ward_df.copy()
 
-        # Calibrated dependent variable Y: Waterway E-Commerce Demand Potential Index (0 - 100)
+        # Biến phụ thuộc Y: Chỉ số tiềm năng nhu cầu chuyển dịch đường thủy (0-100)
         noise = np.random.normal(0, 2.5, size=len(df))
         y_raw = (
             12.0
@@ -48,13 +52,16 @@ class WardEconometricModel:
         )
         df["demand_index_Y"] = np.round(np.clip(y_raw, 25.0, 95.0), 2)
 
-        # Regression features
-        X_cols = ["pop_density_k_per_km2", "dist_to_hub_km", "land_rent_mil_vnd_m2", "road_ris_score", "est_saving_pct"]
-        X = df[X_cols].values
+        # Ma trận biến độc lập
+        x_cols = [
+            "pop_density_k_per_km2", "dist_to_hub_km",
+            "land_rent_mil_vnd_m2", "road_ris_score", "est_saving_pct"
+        ]
+        X = df[x_cols].values
         y = df["demand_index_Y"].values
         n, p = len(y), X.shape[1]
 
-        # Add constant
+        # Thêm cột hệ số chặn
         X_des = np.column_stack([np.ones(n), X])
         xtx_inv = np.linalg.inv(np.dot(X_des.T, X_des))
         beta = np.dot(xtx_inv, np.dot(X_des.T, y))
@@ -72,24 +79,32 @@ class WardEconometricModel:
         var_beta = s2 * np.diag(xtx_inv)
         se_beta = np.sqrt(var_beta)
         t_stats = beta / se_beta
-        p_values = [float(2 * (1 - stats.t.cdf(np.abs(t), df=df_resid))) for t in t_stats]
+        p_values = [
+            float(2 * (1 - stats.t.cdf(np.abs(t), df=df_resid)))
+            for t in t_stats
+        ]
 
         f_stat = ((tss - rss) / p) / (rss / df_resid)
         f_pvalue = float(1.0 - stats.f.cdf(f_stat, p, df_resid))
 
-        # VIF calculation
+        # Tính hệ số phóng đại phương sai (VIF)
         vifs: List[str | float] = ["-"]
         for i in range(p):
             xi = X[:, i]
             other_x = np.delete(X, i, axis=1)
             other_des = np.column_stack([np.ones(n), other_x])
-            b_aux = np.dot(np.linalg.inv(np.dot(other_des.T, other_des)), np.dot(other_des.T, xi))
+            b_aux = np.dot(
+                np.linalg.inv(np.dot(other_des.T, other_des)),
+                np.dot(other_des.T, xi)
+            )
             pred_aux = np.dot(other_des, b_aux)
-            r2_aux = 1.0 - (np.sum((xi - pred_aux) ** 2) / np.sum((xi - np.mean(xi)) ** 2))
+            r2_aux = 1.0 - (
+                np.sum((xi - pred_aux) ** 2) / np.sum((xi - np.mean(xi)) ** 2)
+            )
             vif_val = 1.0 / (1.0 - r2_aux) if r2_aux < 0.99 else 100.0
             vifs.append(round(vif_val, 2))
 
-        # Standardized Beta
+        # Tính hệ số Beta chuẩn hóa
         y_std = np.std(y, ddof=1)
         std_betas: List[str | float] = ["-"]
         for i in range(p):
@@ -97,12 +112,12 @@ class WardEconometricModel:
             std_betas.append(round(beta[i + 1] * (x_std / y_std), 4))
 
         labels = [
-            "(Constant)",
-            "pop_density_k_per_km2 (X1)",
-            "dist_to_hub_km (X2)",
-            "land_rent_mil_vnd_m2 (X3)",
-            "road_ris_score (X4)",
-            "est_saving_pct (X5)"
+            "(Hệ số chặn)",
+            "Mật độ dân số (X1)",
+            "Cự ly ra bến (X2)",
+            "Giá thuê mặt bằng (X3)",
+            "Điểm hạ tầng RIS (X4)",
+            "Tỷ lệ tiết kiệm (X5)"
         ]
 
         coeff_records = []
@@ -129,12 +144,13 @@ class WardEconometricModel:
             "N_Observations": n,
         }
 
-        # Export SPSS syntax
+        # Xuất file cú pháp SPSS
         SPSS_DIR.mkdir(parents=True, exist_ok=True)
         sps_path = SPSS_DIR / "regression_syntax.sps"
-        sps_content = f"""* SPSS Syntax for Saigon River Ward Regression Analysis.
+        ward_csv_path = SPSS_DIR / "spss_ward_data.csv"
+        sps_content = f"""* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon.
 GET DATA /TYPE=TXT
-  /FILE="{str(SPSS_DIR / 'spss_ward_data.csv').replace(chr(92), '/')}"
+  /FILE="{str(ward_csv_path).replace(chr(92), '/')}"
   /ENCODING='UTF8'
   /DELIMITERS=","
   /QUALIFIER='"'

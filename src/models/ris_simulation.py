@@ -1,52 +1,67 @@
 """
-RIS Operational Simulation Model.
-Simulates parcel transportation for 3,000 packages (3.0 tons)
-comparing Conventional Road Trucks vs Electric Barge + RIS + E-Cargo Bikes.
-Calculates transit times, OPEX, cost per parcel, and CO2 emissions.
+Mô hình mô phỏng luồng vận hành RIS (Giai đoạn 4).
+Mô phỏng 3.000 bưu kiện (3.0 tấn) trên trục Hiệp Bình Chánh – Trung tâm.
+So sánh trực tiếp xe tải đường bộ qua QL13 với tàu điện thủy tích hợp RIS.
 """
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 import pandas as pd
 
 
 @dataclass
 class SimulationResult:
-    """Encapsulates operational simulation comparison."""
+    """Đóng gói kết quả so sánh kịch bản mô phỏng vận hành."""
     comparison_df: pd.DataFrame
     metrics_raw: Dict[str, float]
 
 
 class RISSimulationModel:
-    """Simulates multimodal urban waterway e-commerce logistics."""
+    """Mô hình mô phỏng logistics đa phương thức đường thủy đô thị."""
 
-    def __init__(self, total_parcels: int = 3000, cargo_ton: float = 3.0):
+    def __init__(
+        self, total_parcels: int = 3000, cargo_ton: float = 3.0
+    ) -> None:
         self.total_parcels = total_parcels
         self.cargo_ton = cargo_ton
 
     def simulate(self) -> SimulationResult:
-        """Runs the simulation and returns comparison data."""
-        # 1. Road Scenario (Light Diesel Trucks via QL13 - XVNT)
+        """Chạy mô phỏng đối chứng và tính toán các chỉ số kinh tế - môi trường."""
+        # 1. Kịch bản đường bộ: 2 xe tải nhẹ diesel chạy qua QL13 - XVNT
         road_distance_km = 11.5
         road_speed_kmh = 13.5
-        road_time_min = (road_distance_km / road_speed_kmh) * 60 + 15 + 25  # transit + signal delay + unloading
+        # thời gian chạy + trễ đèn giao thông/kẹt xe + bốc dỡ
+        road_time_min = (
+            (road_distance_km / road_speed_kmh) * 60 + 15 + 25
+        )
 
-        diesel_liters = (road_distance_km * 2) * 0.14  # 14L/100km for 2 trucks
-        road_total_cost = (diesel_liters * 21500) + (350000 * 2) + (self.total_parcels * 1800)
+        diesel_liters = (road_distance_km * 2) * 0.14  # định mức 14L/100km
+        road_total_cost = (
+            (diesel_liters * 21500)
+            + (350000 * 2)
+            + (self.total_parcels * 1800)
+        )
         road_cost_parcel = road_total_cost / self.total_parcels
-        road_co2_kg = diesel_liters * 2.68  # IPCC factor
+        road_co2_kg = diesel_liters * 2.68  # hệ số phát thải diesel IPCC
 
-        # 2. Waterway Scenario (Electric Barge + RIS + E-Bike Last-Mile)
+        # 2. Kịch bản đường thủy: Tàu điện giám sát RIS + giao chặng cuối xe máy điện
         water_distance_km = 8.2
         water_speed_kmh = 18.0
-        water_time_min = ((water_distance_km / water_speed_kmh) * 60) + 18 + 15  # transit + berthing/crossdock + e-bike delivery
+        # thời gian chạy luồng + cập bến bốc dỡ roll-on + giao chặng cuối
+        water_time_min = (
+            ((water_distance_km / water_speed_kmh) * 60) + 18 + 15
+        )
 
         elec_kwh = 18.5
-        water_total_cost = (elec_kwh * 3200) + 420000 + (self.total_parcels * 1200)
+        water_total_cost = (
+            (elec_kwh * 3200)
+            + 420000
+            + (self.total_parcels * 1200)
+        )
         water_cost_parcel = water_total_cost / self.total_parcels
-        water_co2_kg = elec_kwh * 0.7221  # Vietnam national grid factor
+        water_co2_kg = elec_kwh * 0.7221  # hệ số phát thải lưới điện Việt Nam
 
-        records = [
+        records: List[Dict[str, str]] = [
             {
                 "Chỉ số so sánh": "Tổng khối lượng bưu kiện",
                 "Đơn vị": "kiện / tấn",

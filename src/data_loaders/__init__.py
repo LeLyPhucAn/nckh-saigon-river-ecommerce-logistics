@@ -1,12 +1,12 @@
 """
-Data Loaders Package.
-Provides clean, validated data ingestion from CSV/JSON sources into typed DataFrames.
+Gói nạp và kiểm tra dữ liệu đầu vào.
+Chuyển đổi dữ liệu CSV/JSON thành DataFrame đã xác thực.
 """
 
 from .hub_loader import load_candidate_hubs, load_river_segments
 from .poi_loader import load_notable_pois
-from .ahp_matrix_loader import load_ahp_matrices
 from .ward_loader import load_ward_socioeconomic_data
+from .ahp_matrix_loader import load_ahp_matrices
 
 __all__ = [
     "load_candidate_hubs",

@@ -1,7 +1,6 @@
 """
-Mathematical and Econometric Models Package.
-Provides clean, decoupled, unit-testable classes for multi-criteria decision making,
-spatial econometrics, and operational logistics simulation.
+Gói các mô hình toán học và kinh tế lượng.
+Cung cấp các lớp tính toán MCDM, hồi quy không gian và mô phỏng vận hành.
 """
 
 from .fuzzy_ahp import FuzzyAHPModel, AHPResult

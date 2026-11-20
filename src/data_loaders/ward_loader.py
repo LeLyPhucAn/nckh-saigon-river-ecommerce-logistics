@@ -1,20 +1,24 @@
 """
-Ward Socio-Economic Data Loader.
-Reads and validates the 28 wards dataset from data/raw/ward_socioeconomic_raw.csv.
+Mô đun nạp dữ liệu kinh tế - xã hội cấp phường.
+Đọc và xác thực dữ liệu 28 phường ven sông từ CSV.
 """
 
 from pathlib import Path
+from typing import Optional
 import pandas as pd
+
 from src.config import RAW_DATA_DIR
 
 
-def load_ward_socioeconomic_data(file_path: Path | None = None) -> pd.DataFrame:
-    """Loads and validates the 28-ward socio-economic dataset."""
+def load_ward_socioeconomic_data(
+    file_path: Optional[Path] = None
+) -> pd.DataFrame:
+    """Nạp và xác thực tập dữ liệu 28 phường ven sông Sài Gòn."""
     if file_path is None:
         file_path = RAW_DATA_DIR / "ward_socioeconomic_raw.csv"
 
     if not file_path.exists():
-        raise FileNotFoundError(f"Ward socio-economic raw file not found at: {file_path}")
+        raise FileNotFoundError(f"Không tìm thấy tệp dữ liệu phường: {file_path}")
 
     df = pd.read_csv(file_path, encoding="utf-8")
     required_cols = [
@@ -24,9 +28,9 @@ def load_ward_socioeconomic_data(file_path: Path | None = None) -> pd.DataFrame:
     ]
     for col in required_cols:
         if col not in df.columns:
-            raise ValueError(f"Missing required column in ward data: {col}")
+            raise ValueError(f"Thiếu cột bắt buộc trong dữ liệu phường: {col}")
 
     if len(df) < 25:
-        raise ValueError(f"Expected at least 25 wards along the corridor, got {len(df)}")
+        raise ValueError(f"Số lượng phường quá ít ({len(df)}), yêu cầu tối thiểu 25")
 
     return df

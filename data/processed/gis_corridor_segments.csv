@@ -1,4 +1,4 @@
 ﻿segment_id,segment_name,length_km,avg_depth_m,num_bridges,min_bridge_clearance_m,num_candidate_hubs,total_condos_buffer,total_commercial_buffer,avg_pop_catchment,avg_road_density,avg_land_rent_vnd_m2,avg_ris_readiness,role
-SEG1,Doan 1: Cua ngo gom hang Dong Bac (Hiep Binh Chanh - Thanh Da),5.8,8.0,2,7.0,3,5,3,85000,14.5,196666,4.17,Consolidation & Inbound Gateway from Binh Duong/Thu Duc Warehouses
-SEG2,Doan 2: Do thi chuyen tiep mat do cao (Thao Dien - Tan Cang),4.6,9.5,1,10.0,3,10,3,133333,21.63,350000,4.77,High-density Residential & Premium Demand Zone (B2C & C2C)
-SEG3,Doan 3: Loi trung tam tieu thu (Ba Son - Bach Dang - Khanh Hoi),3.8,11.0,2,10.0,2,6,6,200000,29.4,600000,5.0,Central Business District & Last-Mile Electric Distribution Core
+SEG1,Đoạn 1: Cửa ngõ gom hàng Đông Bắc (Hiệp Bình Chánh - Thanh Đa),5.8,8.0,2,7.0,3,5,3,85000,14.5,196666,4.17,Consolidation & Inbound Gateway from Binh Duong/Thu Duc Warehouses
+SEG2,Đoạn 2: Đô thị chuyển tiếp mật độ cao (Thảo Điền - Tân Cảng),4.6,9.5,1,10.0,3,10,3,133333,21.63,350000,4.77,High-density Residential & Premium Demand Zone (B2C & C2C)
+SEG3,Đoạn 3: Lõi trung tâm tiêu thụ (Ba Son - Bạch Đằng - Khánh Hội),3.8,11.0,2,10.0,2,6,6,200000,29.4,600000,5.0,Central Business District & Last-Mile Electric Distribution Core

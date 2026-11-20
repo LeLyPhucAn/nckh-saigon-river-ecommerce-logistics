@@ -1,55 +1,48 @@
 """
-Pipeline Coordinator Module.
-Coordinates the end-to-end execution of:
-1. Data Ingestion & Validation
-2. GIS Feature Extraction & Cartography (Day 1)
-3. Fuzzy AHP Global Weight Synthesis
-4. Corridor Segment Evaluation
-5. TOPSIS Micro-Hub Site Selection
-6. Sensitivity Analysis
-7. Ward-Level Spatial Econometrics & SPSS Generation
-8. RIS Multimodal Simulation Demo
+Mô đun điều phối luồng quy trình (Pipeline Coordinator).
+Thực thi tuần tự 7 giai đoạn nghiên cứu từ nạp dữ liệu đến xuất báo cáo.
 """
 
 from pathlib import Path
-import pandas as pd
-from src.config import TABLES_DIR, CHARTS_DIR, SPSS_DIR
+from typing import Dict
+
+from src.config import CHARTS_DIR, SPSS_DIR, TABLES_DIR
 from src.gis.spatial_features import export_day1_datasets, plot_day1_corridor_map
 from src.models.fuzzy_ahp import FuzzyAHPModel
-from src.models.segment_evaluator import SegmentEvaluator
-from src.models.topsis import TOPSISModel
-from src.models.sensitivity_engine import SensitivityEngine
-from src.models.ward_econometrics import WardEconometricModel
 from src.models.ris_simulation import RISSimulationModel
+from src.models.segment_evaluator import SegmentEvaluator
+from src.models.sensitivity_engine import SensitivityEngine
+from src.models.topsis import TOPSISModel
+from src.models.ward_econometrics import WardEconometricModel
 from src.visualization.chart_renderer import (
     plot_fuzzy_ahp_weights,
-    plot_segment_scores,
-    plot_topsis_rankings,
     plot_radar_chart,
-    plot_sensitivity,
-    plot_ward_regression_fit,
     plot_ris_comparison,
+    plot_segment_scores,
+    plot_sensitivity,
+    plot_topsis_rankings,
+    plot_ward_regression_fit,
 )
 
 
-def run_full_pipeline_workflow() -> dict:
-    """Executes the entire research pipeline and returns paths to all generated artifacts."""
+def run_full_pipeline_workflow() -> Dict[str, Path]:
+    """Thực thi toàn bộ luồng mô hình và trả về danh mục đường dẫn các tệp kết quả."""
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     CHARTS_DIR.mkdir(parents=True, exist_ok=True)
     SPSS_DIR.mkdir(parents=True, exist_ok=True)
 
-    artifacts = {}
+    artifacts: Dict[str, Path] = {}
 
-    # Stage 1: GIS Extraction
-    print("[1/7] Ingesting raw GIS features & building spatial buffers...")
+    # Giai đoạn 1: Giải tích không gian GIS Ngày 1
+    print("[1/7] Nạp dữ liệu GIS & dựng vùng đệm đa tầng (500m & 1500m)...")
     hubs_path, segs_path = export_day1_datasets()
     map_path = plot_day1_corridor_map()
     artifacts["gis_hubs"] = hubs_path
     artifacts["gis_segments"] = segs_path
     artifacts["gis_map"] = map_path
 
-    # Stage 2: Fuzzy AHP
-    print("[2/7] Running Fuzzy AHP priority weight synthesis...")
+    # Giai đoạn 2: Tính toán trọng số toàn cục Fuzzy AHP
+    print("[2/7] Tính toán trọng số toàn cục Fuzzy AHP (Chang 1996)...")
     ahp_model = FuzzyAHPModel()
     ahp_res = ahp_model.fit()
     weights_csv = TABLES_DIR / "fuzzy_ahp_weights.csv"
@@ -59,8 +52,8 @@ def run_full_pipeline_workflow() -> dict:
     artifacts["weights_csv"] = weights_csv
     artifacts["weights_chart"] = weights_chart
 
-    # Stage 3: Segment Evaluation
-    print("[3/7] Scoring 3 corridor segments via Min-Max WLC...")
+    # Giai đoạn 3: Chấm điểm tiềm năng 3 tiểu đoạn sông
+    print("[3/7] Chấm điểm tiềm năng 3 đoạn sông bằng Min-Max WLC...")
     seg_eval = SegmentEvaluator(ahp_model=ahp_model)
     seg_res = seg_eval.evaluate()
     seg_csv = TABLES_DIR / "corridor_segment_scores.csv"
@@ -70,8 +63,8 @@ def run_full_pipeline_workflow() -> dict:
     artifacts["segment_csv"] = seg_csv
     artifacts["segment_chart"] = seg_chart
 
-    # Stage 4: TOPSIS Hub Selection
-    print("[4/7] Executing TOPSIS algorithm on 8 candidate Micro-Hubs...")
+    # Giai đoạn 4: Tuyển chọn vị trí trạm Micro-Hub bằng TOPSIS
+    print("[4/7] Xếp hạng đa tiêu chí TOPSIS cho 8 trạm Micro-Hubs ứng viên...")
     topsis_model = TOPSISModel()
     topsis_res = topsis_model.fit()
     topsis_csv = TABLES_DIR / "topsis_hub_rankings.csv"
@@ -84,8 +77,8 @@ def run_full_pipeline_workflow() -> dict:
     artifacts["topsis_chart"] = topsis_chart
     artifacts["radar_chart"] = radar_chart
 
-    # Stage 5: Sensitivity Analysis
-    print("[5/7] Running Sensitivity Analysis across ±20% weight scenarios...")
+    # Giai đoạn 5: Phân tích độ nhạy
+    print("[5/7] Phân tích độ nhạy biến động trọng số chi phí (±20%)...")
     sens_engine = SensitivityEngine(topsis_model=topsis_model)
     sens_res = sens_engine.run_scenarios()
     sens_csv = TABLES_DIR / "sensitivity_analysis_results.csv"
@@ -95,8 +88,8 @@ def run_full_pipeline_workflow() -> dict:
     artifacts["sensitivity_csv"] = sens_csv
     artifacts["sensitivity_chart"] = sens_chart
 
-    # Stage 6: Ward Econometrics & SPSS
-    print("[6/7] Estimating OLS Regression across 28 riverine wards & generating SPSS syntax...")
+    # Giai đoạn 6: Hồi quy kinh tế lượng 28 phường & SPSS
+    print("[6/7] Ước lượng hồi quy OLS 28 phường ven sông & xuất cú pháp SPSS...")
     reg_model = WardEconometricModel()
     reg_res = reg_model.fit()
     ward_csv = SPSS_DIR / "spss_ward_data.csv"
@@ -104,14 +97,19 @@ def run_full_pipeline_workflow() -> dict:
     reg_csv = TABLES_DIR / "econometric_regression_results.csv"
     reg_res.coefficients_df.to_csv(reg_csv, index=False, encoding="utf-8-sig")
     reg_chart = CHARTS_DIR / "ward_regression_fit.png"
-    plot_ward_regression_fit(reg_res.processed_ward_df, reg_res.coefficients_df, reg_res.model_metrics, reg_chart)
+    plot_ward_regression_fit(
+        reg_res.processed_ward_df,
+        reg_res.coefficients_df,
+        reg_res.model_metrics,
+        reg_chart
+    )
     artifacts["ward_csv"] = ward_csv
     artifacts["spss_syntax"] = reg_res.spss_syntax_path
     artifacts["regression_csv"] = reg_csv
     artifacts["regression_chart"] = reg_chart
 
-    # Stage 7: RIS Simulation
-    print("[7/7] Simulating 3,000 parcels dispatch under RIS vs Conventional Road...")
+    # Giai đoạn 7: Mô phỏng luồng vận hành RIS
+    print("[7/7] Mô phỏng 3.000 bưu kiện: Tàu điện tích hợp RIS vs Xe tải QL13...")
     ris_model = RISSimulationModel()
     ris_res = ris_model.simulate()
     ris_csv = TABLES_DIR / "ris_operational_simulation_comparison.csv"

@@ -1,20 +1,22 @@
 """
-Candidate Hubs & River Corridor Data Loader.
-Reads raw data from data/raw/candidate_hubs_raw.csv and data/raw/river_corridor_raw.csv.
+Mô đun nạp dữ liệu bến ứng viên và đoạn sông.
+Đọc từ data/raw/candidate_hubs_raw.csv và data/raw/river_corridor_raw.csv.
 """
 
 from pathlib import Path
+from typing import Optional
 import pandas as pd
+
 from src.config import RAW_DATA_DIR
 
 
-def load_candidate_hubs(file_path: Path | None = None) -> pd.DataFrame:
-    """Loads and validates the 8 candidate Micro-Hubs raw dataset."""
+def load_candidate_hubs(file_path: Optional[Path] = None) -> pd.DataFrame:
+    """Nạp và kiểm tra cấu trúc dữ liệu 8 bến Micro-Hub ứng viên."""
     if file_path is None:
         file_path = RAW_DATA_DIR / "candidate_hubs_raw.csv"
 
     if not file_path.exists():
-        raise FileNotFoundError(f"Candidate hubs raw file not found at: {file_path}")
+        raise FileNotFoundError(f"Không tìm thấy tệp bến ứng viên: {file_path}")
 
     df = pd.read_csv(file_path, encoding="utf-8")
     required_cols = [
@@ -25,26 +27,27 @@ def load_candidate_hubs(file_path: Path | None = None) -> pd.DataFrame:
     ]
     for col in required_cols:
         if col not in df.columns:
-            raise ValueError(f"Missing required column in candidate hubs: {col}")
+            raise ValueError(f"Thiếu cột bắt buộc trong dữ liệu bến: {col}")
 
     return df
 
 
-def load_river_segments(file_path: Path | None = None) -> pd.DataFrame:
-    """Loads and validates the 3 corridor segments raw dataset."""
+def load_river_segments(file_path: Optional[Path] = None) -> pd.DataFrame:
+    """Nạp và kiểm tra cấu trúc dữ liệu 3 tiểu đoạn hành lang sông."""
     if file_path is None:
         file_path = RAW_DATA_DIR / "river_corridor_raw.csv"
 
     if not file_path.exists():
-        raise FileNotFoundError(f"River corridor raw file not found at: {file_path}")
+        raise FileNotFoundError(f"Không tìm thấy tệp đoạn sông: {file_path}")
 
     df = pd.read_csv(file_path, encoding="utf-8")
     required_cols = [
         "segment_id", "segment_name", "start_point", "end_point",
-        "length_km", "avg_depth_m", "num_bridges", "min_bridge_clearance_m", "role"
+        "length_km", "avg_depth_m", "num_bridges",
+        "min_bridge_clearance_m", "role"
     ]
     for col in required_cols:
         if col not in df.columns:
-            raise ValueError(f"Missing required column in river corridor: {col}")
+            raise ValueError(f"Thiếu cột bắt buộc trong dữ liệu đoạn sông: {col}")
 
     return df

@@ -1,137 +1,109 @@
 """
-Spatial Feature Extraction and Map Generation Module for Day 1.
-Calculates geographic metrics, aggregates POI densities, exports clean datasets,
-and renders high-resolution cartographic visualisations.
+Spatial Feature Extraction and Cartographic Map Rendering.
+Calculates spatial features and exports Day 1 datasets and maps.
 """
 
 from pathlib import Path
+from typing import Tuple
 import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 
 from src.config import (
-    CANDIDATE_HUBS,
-    NOTABLE_POIS,
-    RIVER_SEGMENTS,
-    CRS_WGS84,
     CRS_UTM48N,
-    PROCESSED_DATA_DIR,
+    CRS_WGS84,
     MAPS_DIR,
+    PROCESSED_DATA_DIR,
 )
+from src.data_loaders.hub_loader import load_candidate_hubs, load_river_segments
+from src.data_loaders.poi_loader import load_notable_pois
 from .network_extractor import (
-    build_river_geodataframe,
     build_hubs_geodataframe,
+    build_river_geodataframe,
     create_multiring_buffers,
 )
 
 
-def extract_day1_spatial_features() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Computes spatial metrics for the 8 candidate Micro-Hubs and 3 corridor segments.
-    Uses projected UTM Zone 48N coordinate system for accurate Euclidean distance calculations.
-    """
-    # Build GeoDataFrames
+def extract_day1_spatial_features() -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Computes spatial features for hubs and corridor segments."""
     gdf_hubs = build_hubs_geodataframe()
     gdf_hubs_utm = gdf_hubs.to_crs(CRS_UTM48N)
 
-    # POIs GeoDataFrame
-    df_pois = pd.DataFrame(NOTABLE_POIS)
+    df_pois = load_notable_pois()
     poi_points = [Point(xy) for xy in zip(df_pois["lon"], df_pois["lat"])]
     gdf_pois = gpd.GeoDataFrame(df_pois, geometry=poi_points, crs=CRS_WGS84)
     gdf_pois_utm = gdf_pois.to_crs(CRS_UTM48N)
 
-    # Calculate POI counts within 500m and 1500m for each candidate hub
-    condos_500m = []
-    malls_500m = []
-    condos_1500m = []
-    malls_1500m = []
+    # Count POIs within 500m and 1500m
+    condos_500m, malls_500m = [], []
+    condos_1500m, malls_1500m = [], []
 
     for _, hub_row in gdf_hubs_utm.iterrows():
-        hub_geom = hub_row.geometry
-        dists = gdf_pois_utm.geometry.distance(hub_geom)
-
-        # Condos within 500m and 1500m
+        dists = gdf_pois_utm.geometry.distance(hub_row.geometry)
         is_condo = gdf_pois_utm["type"] == "condo"
         is_mall = gdf_pois_utm["type"].isin(["mall", "office_mall"])
 
-        # Base counts + empirical density baseline from HCMC ward data
-        c500 = int((dists[is_condo] <= 500).sum())
-        m500 = int((dists[is_mall] <= 500).sum())
-        c1500 = int((dists[is_condo] <= 1500).sum())
-        m1500 = int((dists[is_mall] <= 1500).sum())
+        condos_500m.append(int((dists[is_condo] <= 500).sum()))
+        malls_500m.append(int((dists[is_mall] <= 500).sum()))
+        condos_1500m.append(int((dists[is_condo] <= 1500).sum()))
+        malls_1500m.append(int((dists[is_mall] <= 1500).sum()))
 
-        condos_500m.append(c500)
-        malls_500m.append(m500)
-        condos_1500m.append(c1500)
-        malls_1500m.append(m1500)
-
-    # Empirical road density and population calibration (based on HCMC Statistical Yearbook & OpenStreetMap)
-    # Ward-level density multipliers:
-    # Segment 1 (Thu Duc, Binh Thanh outer): ~18,000 - 24,000 people/km2; road density ~12-16 km/km2
-    # Segment 2 (Thao Dien, Tan Cang): ~25,000 - 38,000 people/km2; road density ~18-24 km/km2
-    # Segment 3 (CBD District 1, District 4): ~35,000 - 45,000 people/km2; road density ~26-32 km/km2
-    empirical_pop = {
-        "HUB01": 85000,
-        "HUB02": 92000,
-        "HUB03": 78000,
-        "HUB04": 110000,
-        "HUB05": 125000,
-        "HUB06": 165000,
-        "HUB07": 190000,
-        "HUB08": 210000,
+    # Empirical values from statistical yearbook and OSM
+    pop_map = {
+        "HUB01": 85000, "HUB02": 92000, "HUB03": 78000, "HUB04": 110000,
+        "HUB05": 125000, "HUB06": 165000, "HUB07": 190000, "HUB08": 210000
+    }
+    road_map = {
+        "HUB01": 14.2, "HUB02": 15.8, "HUB03": 13.5, "HUB04": 19.4,
+        "HUB05": 21.0, "HUB06": 24.5, "HUB07": 28.2, "HUB08": 30.6
     }
 
-    empirical_road_density = {
-        "HUB01": 14.2,
-        "HUB02": 15.8,
-        "HUB03": 13.5,
-        "HUB04": 19.4,
-        "HUB05": 21.0,
-        "HUB06": 24.5,
-        "HUB07": 28.2,
-        "HUB08": 30.6,
-    }
-
-    hubs_df = pd.DataFrame(CANDIDATE_HUBS)
+    hubs_df = load_candidate_hubs()
     hubs_df["condos_500m"] = condos_500m
     hubs_df["malls_500m"] = malls_500m
     hubs_df["condos_1500m"] = condos_1500m
     hubs_df["malls_1500m"] = malls_1500m
-    hubs_df["population_1500m"] = [empirical_pop[hid] for hid in hubs_df["hub_id"]]
-    hubs_df["road_density_1500m_km_per_km2"] = [empirical_road_density[hid] for hid in hubs_df["hub_id"]]
+    hubs_df["population_1500m"] = [pop_map[h] for h in hubs_df["hub_id"]]
+    hubs_df["road_density_1500m_km_per_km2"] = [
+        road_map[h] for h in hubs_df["hub_id"]
+    ]
 
-    # Build Segment-level DataFrame
+    # Aggregate by corridor segment
     seg_records = []
-    for seg in RIVER_SEGMENTS:
+    river_segs = load_river_segments()
+    for _, seg in river_segs.iterrows():
         sid = seg["segment_id"]
-        seg_hubs = hubs_df[hubs_df["segment_id"] == sid]
+        sub_hubs = hubs_df[hubs_df["segment_id"] == sid]
 
-        record = {
+        seg_records.append({
             "segment_id": sid,
             "segment_name": seg["segment_name"],
             "length_km": seg["length_km"],
             "avg_depth_m": seg["avg_depth_m"],
             "num_bridges": seg["num_bridges"],
             "min_bridge_clearance_m": seg["min_bridge_clearance_m"],
-            "num_candidate_hubs": len(seg_hubs),
-            "total_condos_buffer": int(seg_hubs["condos_1500m"].sum()),
-            "total_commercial_buffer": int(seg_hubs["malls_1500m"].sum()),
-            "avg_pop_catchment": int(seg_hubs["population_1500m"].mean()),
-            "avg_road_density": round(float(seg_hubs["road_density_1500m_km_per_km2"].mean()), 2),
-            "avg_land_rent_vnd_m2": int(seg_hubs["est_land_rent_vnd_m2"].mean()),
-            "avg_ris_readiness": round(float(seg_hubs["ris_readiness_score"].mean()), 2),
+            "num_candidate_hubs": len(sub_hubs),
+            "total_condos_buffer": int(sub_hubs["condos_1500m"].sum()),
+            "total_commercial_buffer": int(sub_hubs["malls_1500m"].sum()),
+            "avg_pop_catchment": int(sub_hubs["population_1500m"].mean()),
+            "avg_road_density": round(
+                float(sub_hubs["road_density_1500m_km_per_km2"].mean()), 2
+            ),
+            "avg_land_rent_vnd_m2": int(
+                sub_hubs["est_land_rent_vnd_m2"].mean()
+            ),
+            "avg_ris_readiness": round(
+                float(sub_hubs["ris_readiness_score"].mean()), 2
+            ),
             "role": seg["role"],
-        }
-        seg_records.append(record)
+        })
 
-    segments_df = pd.DataFrame(seg_records)
-    return hubs_df, segments_df
+    return hubs_df, pd.DataFrame(seg_records)
 
 
-def export_day1_datasets() -> tuple[Path, Path]:
-    """Exports the two clean Day 1 datasets to CSV files in data/processed."""
+def export_day1_datasets() -> Tuple[Path, Path]:
+    """Saves processed CSV files for candidate hubs and corridor segments."""
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     hubs_df, segments_df = extract_day1_spatial_features()
 
@@ -145,32 +117,24 @@ def export_day1_datasets() -> tuple[Path, Path]:
 
 
 def plot_day1_corridor_map(save_path: Path | None = None) -> Path:
-    """
-    Renders and exports a publication-grade cartographic map showing:
-    - Saigon River 3 study segments
-    - 8 candidate Micro-Hub locations with 500m and 1500m buffer zones
-    - Commercial POIs and High-Density Condos
-    - Bridge clearances and spatial annotations
-    """
+    """Renders a 300 DPI GIS cartography map for the study corridor."""
     MAPS_DIR.mkdir(parents=True, exist_ok=True)
     if save_path is None:
         save_path = MAPS_DIR / "saigon_river_corridor_day1.png"
 
-    # Load GIS Data
     gdf_river = build_river_geodataframe()
     gdf_hubs = build_hubs_geodataframe()
     buffers = create_multiring_buffers(gdf_hubs)
 
-    df_pois = pd.DataFrame(NOTABLE_POIS)
+    df_pois = load_notable_pois()
     poi_points = [Point(xy) for xy in zip(df_pois["lon"], df_pois["lat"])]
     gdf_pois = gpd.GeoDataFrame(df_pois, geometry=poi_points, crs=CRS_WGS84)
 
-    # Plot styling
     plt.rcParams["font.sans-serif"] = "DejaVu Sans"
     fig, ax = plt.subplots(figsize=(12, 14), dpi=300)
     ax.set_facecolor("#f7f9fb")
 
-    # 1. Plot 1500m last-mile buffer (outer light blue)
+    # 1500m outer buffer
     buffers["buffer_1500m"].plot(
         ax=ax,
         color="#a0c4ff",
@@ -181,74 +145,58 @@ def plot_day1_corridor_map(save_path: Path | None = None) -> Path:
         label="1,500m Last-Mile Catchment (E-bike 5-10 min)",
     )
 
-    # 2. Plot 500m micro-hub buffer (inner light cyan)
+    # 500m inner buffer
     buffers["buffer_500m"].plot(
         ax=ax,
         color="#70e000",
         alpha=0.35,
         edgecolor="#38b000",
-        linestyle="-",
         linewidth=1.5,
         label="500m Pedestrian / Micro-Hub Direct Zone",
     )
 
-    # 3. Plot River segments with distinct colors
+    # River segments
     colors = {"SEG1": "#0077b6", "SEG2": "#023e8a", "SEG3": "#03045e"}
-    segment_labels = {
+    labels = {
         "SEG1": "Segment 1: Hiep Binh Chanh - Thanh Da (Gateway)",
         "SEG2": "Segment 2: Thao Dien - Tan Cang (High-density)",
         "SEG3": "Segment 3: Ba Son - Bach Dang - Khanh Hoi (CBD Core)",
     }
-
     for sid, color in colors.items():
-        sub_river = gdf_river[gdf_river["segment_id"] == sid]
-        sub_river.plot(
-            ax=ax,
-            color=color,
-            linewidth=5.5,
-            label=segment_labels[sid],
-        )
+        sub_r = gdf_river[gdf_river["segment_id"] == sid]
+        sub_r.plot(ax=ax, color=color, linewidth=5.5, label=labels[sid])
 
-    # 4. Plot POIs (Condos and Malls)
+    # POIs
     condos = gdf_pois[gdf_pois["type"] == "condo"]
     malls = gdf_pois[gdf_pois["type"].isin(["mall", "office_mall"])]
 
     ax.scatter(
-        condos.geometry.x,
-        condos.geometry.y,
-        marker="^",
-        color="#e63946",
-        s=85,
-        zorder=5,
+        condos.geometry.x, condos.geometry.y,
+        marker="^", color="#e63946", s=85, zorder=5,
         label="High-Density Condos / Apartments (Demand Source)",
     )
     ax.scatter(
-        malls.geometry.x,
-        malls.geometry.y,
-        marker="s",
-        color="#f77f00",
-        s=95,
-        zorder=5,
+        malls.geometry.x, malls.geometry.y,
+        marker="s", color="#f77f00", s=95, zorder=5,
         label="Malls & Commercial Centers (Logistics POIs)",
     )
 
-    # 5. Plot Candidate Hubs
+    # Candidate Hubs
     ax.scatter(
-        gdf_hubs.geometry.x,
-        gdf_hubs.geometry.y,
-        marker="o",
-        color="#d90429",
-        edgecolors="white",
-        linewidths=2.0,
-        s=160,
-        zorder=6,
-        label="8 Candidate Micro-Hub Locations (A_k)",
+        gdf_hubs.geometry.x, gdf_hubs.geometry.y,
+        marker="o", color="#d90429", edgecolors="white",
+        linewidths=2.0, s=160, zorder=6,
+        label="8 Candidate Micro-Hub Locations",
     )
 
-    # Annotate Candidate Hubs
+    # Hub annotations
     for _, row in gdf_hubs.iterrows():
+        annotation_text = (
+            f"{row['hub_id']}: {row['hub_name']}\n"
+            f"(CBD: {row['dist_to_cbd_km']}km, Clearance: {row['bridge_clearance_m']}m)"
+        )
         ax.annotate(
-            f"{row['hub_id']}: {row['hub_name']}\n(CBD: {row['dist_to_cbd_km']}km, Clearance: {row['bridge_clearance_m']}m)",
+            annotation_text,
             xy=(row.geometry.x, row.geometry.y),
             xytext=(10, 8),
             textcoords="offset points",
@@ -259,41 +207,18 @@ def plot_day1_corridor_map(save_path: Path | None = None) -> Path:
             zorder=7,
         )
 
-    # Map Decorators
+    # Styling
     ax.set_title(
         "Saigon River Urban Waterway E-commerce Logistics Corridor\n"
-        "Day 1 GIS Multi-Ring Buffer Analysis & Micro-Hub Candidates (HCMC)",
-        fontsize=14,
+        "Day 1 GIS Multi-Ring Buffer Analysis & Micro-Hub Candidates",
+        fontsize=13.5,
         fontweight="bold",
         pad=16,
-        color="#0b090a",
     )
     ax.set_xlabel("Longitude (°E)", fontsize=10, fontweight="bold")
     ax.set_ylabel("Latitude (°N)", fontsize=10, fontweight="bold")
     ax.grid(True, linestyle=":", alpha=0.6, color="#adb5bd")
-
-    # Legend
-    ax.legend(
-        loc="upper left",
-        fontsize=9,
-        framealpha=0.95,
-        facecolor="white",
-        edgecolor="#adb5bd",
-    )
-
-    # Add North Arrow & Scale text box
-    ax.text(
-        0.95,
-        0.05,
-        "N\n▲\nCoordinate: WGS84 / UTM 48N\nResearch Framework: NCKH 2026",
-        transform=ax.transAxes,
-        ha="center",
-        va="center",
-        fontsize=8.5,
-        fontweight="bold",
-        color="#2b2d42",
-        bbox=dict(boxstyle="square,pad=0.4", fc="white", ec="#8d99ae", alpha=0.9),
-    )
+    ax.legend(loc="upper left", fontsize=9, framealpha=0.95)
 
     plt.tight_layout()
     fig.savefig(save_path, dpi=300)

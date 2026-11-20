@@ -1,4 +1,4 @@
-* SPSS Syntax for Saigon River Ward Regression Analysis.
+* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon.
 GET DATA /TYPE=TXT
   /FILE="D:/NCKH/De tai dong song/Mo hinh nckh song/spss_models/spss_ward_data.csv"
   /ENCODING='UTF8'
