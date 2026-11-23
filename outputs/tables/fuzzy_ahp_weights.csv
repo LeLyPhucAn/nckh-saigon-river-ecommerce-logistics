@@ -1,16 +1,16 @@
-﻿indicator_code,indicator_name,group_code,direction,group_weight,local_weight,global_weight
-NAV1,Tĩnh không cầu & Độ sâu luồng,NAV,+,0.1862,0.5396,0.1005
-NAV2,Mật độ cầu bến tiếp cận,NAV,+,0.1862,0.1634,0.0304
-NAV3,Hạ tầng số RIS & Viễn thông,NAV,+,0.1862,0.297,0.0553
-ECO1,Mật độ dân cư & Chung cư,ECO,+,0.3242,0.5396,0.1749
-ECO2,Khoảng cách tới kho tổng,ECO,-,0.3242,0.297,0.0963
-ECO3,Kết nối mạng lưới đường bộ,ECO,+,0.3242,0.1634,0.053
-FIN1,Giá thuê mặt bằng ven sông,FIN,-,0.306,0.5396,0.1651
-FIN2,Chi phí vận hành tàu điện/hybrid,FIN,-,0.306,0.297,0.0909
-FIN3,Chi phí bốc xếp tại Micro-Hub,FIN,-,0.306,0.1634,0.05
-ENV1,Tiềm năng giảm phát thải CO2,ENV,+,0.073,0.5396,0.0394
-ENV2,Giảm tải điểm nóng ùn tắc,ENV,+,0.073,0.297,0.0217
-ENV3,Rủi ro sạt lở & Sóng tàu,ENV,-,0.073,0.1634,0.0119
-BEH1,Thái độ ủng hộ logistics xanh,SOC_BEH,+,0.1106,0.297,0.0329
-BEH2,Sẵn sàng chuyển đổi của 3PL/Shop,SOC_BEH,+,0.1106,0.5396,0.0597
-SOC1,Xung đột giao thông thủy & Rủi ro,SOC_BEH,-,0.1106,0.1634,0.0181
+﻿indicator_code,indicator_name,group_code,direction,group_weight,local_weight,global_weight,fuzzy_l,fuzzy_m,fuzzy_u
+NAV1,Tĩnh không cầu & Độ sâu luồng,NAV,+,0.1995,0.519,0.1035,0.027,0.1005,0.3674
+NAV2,Mật độ cầu bến tiếp cận,NAV,+,0.1995,0.173,0.0345,0.0094,0.0304,0.1274
+NAV3,Hạ tầng số RIS & Viễn thông,NAV,+,0.1995,0.3079,0.0614,0.0149,0.0553,0.2314
+ECO1,Mật độ dân cư & Chung cư,ECO,+,0.3114,0.519,0.1616,0.0522,0.1749,0.5069
+ECO2,Khoảng cách tới kho tổng,ECO,-,0.3114,0.3079,0.0959,0.0287,0.0963,0.3193
+ECO3,Kết nối mạng lưới đường bộ,ECO,+,0.3114,0.173,0.0539,0.0181,0.053,0.1757
+FIN1,Giá thuê mặt bằng ven sông,FIN,-,0.2947,0.519,0.153,0.0481,0.1651,0.4848
+FIN2,Chi phí vận hành tàu điện/hybrid,FIN,-,0.2947,0.3079,0.0907,0.0265,0.0909,0.3054
+FIN3,Chi phí bốc xếp tại Micro-Hub,FIN,-,0.2947,0.173,0.051,0.0167,0.05,0.168
+ENV1,Tiềm năng giảm phát thải CO2,ENV,+,0.0774,0.519,0.0402,0.0122,0.0394,0.136
+ENV2,Giảm tải điểm nóng ùn tắc,ENV,+,0.0774,0.3079,0.0238,0.0067,0.0217,0.0857
+ENV3,Rủi ro sạt lở & Sóng tàu,ENV,-,0.0774,0.173,0.0134,0.0042,0.0119,0.0471
+BEH1,Thái độ ủng hộ logistics xanh,SOC_BEH,+,0.1171,0.3079,0.036,0.0093,0.0329,0.1329
+BEH2,Sẵn sàng chuyển đổi của 3PL/Shop,SOC_BEH,+,0.1171,0.519,0.0608,0.0168,0.0597,0.211
+SOC1,Xung đột giao thông thủy & Rủi ro,SOC_BEH,-,0.1171,0.173,0.0203,0.0058,0.0181,0.0731

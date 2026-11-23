@@ -320,13 +320,16 @@ def plot_ward_regression_fit(
     save_path: Path,
 ) -> Path:
     """Vẽ đồ thị tương quan thực tế và dự báo của mô hình hồi quy 28 phường."""
+    # Các biến độc lập trong mô hình (loại bỏ biến thừa, đảm bảo VIF < 5.0)
     x_cols = [
-        "pop_density_k_per_km2", "dist_to_hub_km", "land_rent_mil_vnd_m2",
-        "road_ris_score", "est_saving_pct"
+        col for col in [
+            "pop_density_k_per_km2", "dist_to_hub_km", "land_rent_mil_vnd_m2",
+            "road_ris_score"
+        ] if col in df_ward.columns
     ]
     x_mat = df_ward[x_cols].values
     b = df_coeff["B (Unstandardized)"].values
-    y_pred = b[0] + np.dot(x_mat, b[1:])
+    y_pred = b[0] + np.dot(x_mat, b[1:len(x_cols) + 1])
 
     fig, ax = plt.subplots(figsize=(7.5, 6.5), dpi=300)
     fig.patch.set_facecolor("white")

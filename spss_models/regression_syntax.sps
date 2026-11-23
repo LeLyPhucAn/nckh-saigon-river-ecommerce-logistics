@@ -1,6 +1,6 @@
-* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon.
+* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon (Cap nhat chuan kiem dinh).
 GET DATA /TYPE=TXT
-  /FILE="D:/NCKH/De tai dong song/Mo hinh nckh song/spss_models/spss_ward_data.csv"
+  /FILE="D:/nckh-saigon-river-ecommerce-logistics/spss_models/spss_ward_data.csv"
   /ENCODING='UTF8'
   /DELIMITERS=","
   /QUALIFIER='"'
@@ -13,7 +13,7 @@ GET DATA /TYPE=TXT
   dist_to_hub_km F8.2
   land_rent_mil_vnd_m2 F8.2
   road_ris_score F8.2
-  est_saving_pct F8.2
+  ecommerce_demand_index F8.2
   demand_index_Y F8.2.
 EXECUTE.
 
@@ -23,4 +23,5 @@ REGRESSION
   /CRITERIA=PIN(.05) POUT(.10)
   /NOORIGIN
   /DEPENDENT demand_index_Y
-  /METHOD=ENTER pop_density_k_per_km2 dist_to_hub_km land_rent_mil_vnd_m2 road_ris_score est_saving_pct.
+  /METHOD=ENTER pop_density_k_per_km2 dist_to_hub_km land_rent_mil_vnd_m2 road_ris_score
+  /RESIDUALS DURBIN HISTOGRAM(ZRESID) NORMPROB(ZRESID).

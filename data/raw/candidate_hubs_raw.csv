@@ -1,9 +1,9 @@
-hub_id,hub_name,segment_id,district,lat,lon,nearest_bridge,bridge_clearance_m,river_depth_m,dist_to_cbd_km,est_land_rent_vnd_m2,ris_readiness_score
-HUB01,Bến Hiệp Bình Chánh,SEG1,TP. Thủ Đức,10.8285,106.7212,Cầu Bình Lợi / Bình Triệu,7.0,8.5,8.2,180000,4.5
-HUB02,Bến Bình Lợi,SEG1,Bình Thạnh,10.8231,106.7085,Cầu Bình Lợi,7.0,8.0,7.1,220000,4.0
-HUB03,Bến Thanh Đa,SEG1,Bình Thạnh,10.8038,106.7241,Cầu Kinh Thanh Đa,6.5,7.5,6.4,190000,4.0
-HUB04,Bến Thảo Điền,SEG2,TP. Thủ Đức,10.8052,106.7335,Cầu Sài Gòn,10.0,9.0,5.2,350000,4.5
-HUB05,Bến Bình An,SEG2,TP. Thủ Đức,10.7924,106.7268,Cầu Sài Gòn / Thủ Thiêm,10.0,9.5,3.8,320000,4.8
-HUB06,Bến Tân Cảng,SEG2,Bình Thạnh,10.7937,106.7203,Cầu Sài Gòn,10.0,10.0,3.5,380000,5.0
-HUB07,Bến Ba Son,SEG3,Quận 1,10.7816,106.7088,Cầu Ba Son (Thủ Thiêm 2),10.5,11.0,1.5,550000,5.0
-HUB08,Bến Bạch Đằng - Khánh Hội,SEG3,Quận 1 - Quận 4,10.7715,106.7065,Cầu Khánh Hội / Mống,10.0,11.5,0.8,650000,5.0
+hub_id,hub_name,segment_id,district,lat,lon,nearest_bridge,bridge_clearance_m,river_depth_m,dist_to_cbd_km,est_land_rent_vnd_m2,ris_readiness_score,erosion_safety_score
+HUB01,Bến Hiệp Bình Chánh,SEG1,TP. Thủ Đức,10.8285,106.7212,Cầu Bình Lợi / Bình Triệu,7.0,8.5,8.2,180000,4.5,4.0
+HUB02,Bến Bình Lợi,SEG1,Bình Thạnh,10.8231,106.7085,Cầu Bình Lợi,7.0,8.0,7.1,220000,4.0,3.8
+HUB03,Bến Thanh Đa,SEG1,Bình Thạnh,10.8038,106.7241,Cầu Kinh Thanh Đa,6.5,7.5,6.4,190000,4.0,2.2
+HUB04,Bến Thảo Điền,SEG2,TP. Thủ Đức,10.8052,106.7335,Cầu Sài Gòn,10.0,9.0,5.2,350000,4.5,4.2
+HUB05,Bến Bình An,SEG2,TP. Thủ Đức,10.7924,106.7268,Cầu Sài Gòn / Thủ Thiêm,10.0,9.5,3.8,320000,4.8,4.5
+HUB06,Bến Tân Cảng,SEG2,Bình Thạnh,10.7937,106.7203,Cầu Sài Gòn,10.0,10.0,3.5,380000,5.0,4.8
+HUB07,Bến Ba Son,SEG3,Quận 1,10.7816,106.7088,Cầu Ba Son (Thủ Thiêm 2),10.5,11.0,1.5,550000,5.0,5.0
+HUB08,Bến Bạch Đằng - Khánh Hội,SEG3,Quận 1 - Quận 4,10.7715,106.7065,Cầu Khánh Hội / Mống,10.0,11.5,0.8,650000,5.0,5.0

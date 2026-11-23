@@ -1,10 +1,12 @@
 """
 Mô đun điều phối luồng quy trình (Pipeline Coordinator).
 Thực thi tuần tự 7 giai đoạn nghiên cứu từ nạp dữ liệu đến xuất báo cáo.
+Kết nối dữ liệu chặt chẽ và nhất quán giữa GIS -> AHP -> TOPSIS -> Sensitivity -> Econometrics -> RIS.
 """
 
 from pathlib import Path
 from typing import Dict
+import pandas as pd
 
 from src.config import CHARTS_DIR, SPSS_DIR, TABLES_DIR
 from src.gis.spatial_features import export_day1_datasets, plot_day1_corridor_map
@@ -41,8 +43,8 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["gis_segments"] = segs_path
     artifacts["gis_map"] = map_path
 
-    # Giai đoạn 2: Tính toán trọng số toàn cục Fuzzy AHP
-    print("[2/7] Tính toán trọng số toàn cục Fuzzy AHP (Chang 1996)...")
+    # Giai đoạn 2: Tính toán trọng số toàn cục Triangular Fuzzy AHP
+    print("[2/7] Tính toán trọng số toàn cục Triangular Fuzzy AHP (TFN Buckley & Chang)...")
     ahp_model = FuzzyAHPModel()
     ahp_res = ahp_model.fit()
     weights_csv = TABLES_DIR / "fuzzy_ahp_weights.csv"
@@ -52,7 +54,7 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["weights_csv"] = weights_csv
     artifacts["weights_chart"] = weights_chart
 
-    # Giai đoạn 3: Chấm điểm tiềm năng 3 tiểu đoạn sông
+    # Giai đoạn 3: Chấm điểm tiềm năng 3 tiểu đoạn sông (Min-Max WLC)
     print("[3/7] Chấm điểm tiềm năng 3 đoạn sông bằng Min-Max WLC...")
     seg_eval = SegmentEvaluator(ahp_model=ahp_model)
     seg_res = seg_eval.evaluate()
@@ -63,10 +65,11 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["segment_csv"] = seg_csv
     artifacts["segment_chart"] = seg_chart
 
-    # Giai đoạn 4: Tuyển chọn vị trí trạm Micro-Hub bằng TOPSIS
-    print("[4/7] Xếp hạng đa tiêu chí TOPSIS cho 8 trạm Micro-Hubs ứng viên...")
-    topsis_model = TOPSISModel()
-    topsis_res = topsis_model.fit()
+    # Giai đoạn 4: Tuyển chọn vị trí trạm Micro-Hub bằng TOPSIS (Liên kết GIS và AHP)
+    print("[4/7] Xếp hạng đa tiêu chí TOPSIS cho 8 trạm Micro-Hubs (nhận trực tiếp phụ tải GIS và trọng số AHP)...")
+    df_gis_hubs = pd.read_csv(hubs_path)
+    topsis_model = TOPSISModel(candidate_hubs_df=df_gis_hubs)
+    topsis_res = topsis_model.fit(ahp_global_weights_df=ahp_res.global_weights_df)
     topsis_csv = TABLES_DIR / "topsis_hub_rankings.csv"
     topsis_res.rankings_df.to_csv(topsis_csv, index=False, encoding="utf-8-sig")
     topsis_chart = CHARTS_DIR / "topsis_rankings.png"
@@ -77,10 +80,10 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["topsis_chart"] = topsis_chart
     artifacts["radar_chart"] = radar_chart
 
-    # Giai đoạn 5: Phân tích độ nhạy
-    print("[5/7] Phân tích độ nhạy biến động trọng số chi phí (±20%)...")
+    # Giai đoạn 5: Phân tích độ nhạy (Kiểm định tính ổn định của HUB06)
+    print("[5/7] Phân tích độ nhạy đa kịch bản & OAT (kiểm tra độ ổn định bến tối ưu HUB06)...")
     sens_engine = SensitivityEngine(topsis_model=topsis_model)
-    sens_res = sens_engine.run_scenarios()
+    sens_res = sens_engine.run_scenarios(ahp_global_weights_df=ahp_res.global_weights_df)
     sens_csv = TABLES_DIR / "sensitivity_analysis_results.csv"
     sens_res.rankings_by_scenario_df.to_csv(sens_csv, index=False, encoding="utf-8-sig")
     sens_chart = CHARTS_DIR / "sensitivity_analysis.png"
@@ -88,8 +91,8 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["sensitivity_csv"] = sens_csv
     artifacts["sensitivity_chart"] = sens_chart
 
-    # Giai đoạn 6: Hồi quy kinh tế lượng 28 phường & SPSS
-    print("[6/7] Ước lượng hồi quy OLS 28 phường ven sông & xuất cú pháp SPSS...")
+    # Giai đoạn 6: Hồi quy kinh tế lượng 28 phường & SPSS (Dữ liệu thực nghiệm minh bạch)
+    print("[6/7] Ước lượng hồi quy OLS 28 phường ven sông & kiểm định VIF, Breusch-Pagan, SPSS...")
     reg_model = WardEconometricModel()
     reg_res = reg_model.fit()
     ward_csv = SPSS_DIR / "spss_ward_data.csv"
@@ -108,15 +111,27 @@ def run_full_pipeline_workflow() -> Dict[str, Path]:
     artifacts["regression_csv"] = reg_csv
     artifacts["regression_chart"] = reg_chart
 
-    # Giai đoạn 7: Mô phỏng luồng vận hành RIS
-    print("[7/7] Mô phỏng 3.000 bưu kiện: Tàu điện tích hợp RIS vs Xe tải QL13...")
-    ris_model = RISSimulationModel()
+    # Giai đoạn 7: Mô phỏng luồng vận hành RIS (Liên kết với bến số 1 từ TOPSIS)
+    top_hub = topsis_res.rankings_df.iloc[0]
+    print(f"[7/7] Mô phỏng luồng vận hành RIS kết nối bến tối ưu {top_hub['hub_name']} ({top_hub['hub_id']})...")
+    ris_model = RISSimulationModel(
+        destination_hub_name=f"{top_hub['hub_name']} ({top_hub['hub_id']})",
+        water_distance_km=8.2,
+        road_distance_km=11.5
+    )
     ris_res = ris_model.simulate()
     ris_csv = TABLES_DIR / "ris_operational_simulation_comparison.csv"
     ris_res.comparison_df.to_csv(ris_csv, index=False, encoding="utf-8-sig")
+    ris_multi_csv = TABLES_DIR / "ris_multiscenario_simulation.csv"
+    ris_res.multi_scenario_df.to_csv(ris_multi_csv, index=False, encoding="utf-8-sig")
     ris_chart = CHARTS_DIR / "ris_vs_road_comparison.png"
     plot_ris_comparison(ris_res.metrics_raw, ris_chart)
     artifacts["ris_csv"] = ris_csv
+    artifacts["ris_multi_csv"] = ris_multi_csv
     artifacts["ris_chart"] = ris_chart
 
+    print(f"\n>>> HOÀN THÀNH TOÀN BỘ PIPELINE: 7/7 giai đoạn thành công!")
+    print(f"    - Bến tối ưu số 1: {top_hub['hub_name']} (CC = {top_hub['closeness_coefficient']:.4f})")
+    print(f"    - Độ ổn định bến HUB06: {sens_res.hub06_stability_rate * 100:.1f}%")
+    print(f"    - Mô hình hồi quy OLS: R2 = {reg_res.model_metrics['R_squared']:.4f}, F = {reg_res.model_metrics['F_Statistic']}")
     return artifacts

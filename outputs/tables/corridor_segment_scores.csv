@@ -1,4 +1,4 @@
 ﻿segment_id,segment_name,length_km,composite_score,role,rank
-SEG2,Đoạn 2: Đô thị chuyển tiếp mật độ cao (Thảo Điền - Tân Cảng),4.6,0.6906,High-density Residential & Premium Demand Zone (B2C & C2C),1
-SEG3,Đoạn 3: Lõi trung tâm tiêu thụ (Ba Son - Bạch Đằng - Khánh Hội),3.8,0.4398,Central Business District & Last-Mile Electric Distribution Core,2
-SEG1,Đoạn 1: Cửa ngõ gom hàng Đông Bắc (Hiệp Bình Chánh - Thanh Đa),5.8,0.4204,Consolidation & Inbound Gateway from Binh Duong/Thu Duc Warehouses,3
+SEG2,Đoạn 2: Đô thị chuyển tiếp mật độ cao (Thảo Điền - Tân Cảng),4.6,0.6869,High-density Residential & Premium Demand Zone (B2C & C2C),1
+SEG3,Đoạn 3: Lõi trung tâm tiêu thụ (Ba Son - Bạch Đằng - Khánh Hội),3.8,0.4598,Central Business District & Last-Mile Electric Distribution Core,2
+SEG1,Đoạn 1: Cửa ngõ gom hàng Đông Bắc (Hiệp Bình Chánh - Thanh Đa),5.8,0.4109,Consolidation & Inbound Gateway from Binh Duong/Thu Duc Warehouses,3
