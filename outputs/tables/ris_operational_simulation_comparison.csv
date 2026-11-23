@@ -1,7 +1,8 @@
 ﻿Chỉ số so sánh,Đơn vị,Đường bộ truyền thống (Xe tải nhẹ),Đường thủy tích hợp RIS (Tàu điện),Hiệu quả chênh lệch
-Tổng khối lượng bưu kiện,kiện / tấn,"3,000 kiện (3.0 tấn)","3,000 kiện (3.0 tấn)",Tương đương
+Tuyến kết nối mô phỏng,Hành lang,Kho Hiệp Bình Chánh -> QL13 -> Tân Cảng,Bến Hiệp Bình Chánh -> Bến Tân Cảng (HUB06),Đúng tuyến tối ưu TOPSIS
+Tổng khối lượng bưu kiện,kiện / tấn,"3,000 kiện (3.0 tấn)","3,000 kiện (3.0 tấn)",Tương đương quy mô
 Khoảng cách hành trình,km,11.5 km,8.2 km,-3.3 km (-28.7%)
-Thời gian giao hàng giờ cao điểm,phút,91.1 phút,60.3 phút,-30.8 phút (-33.8%)
-Tổng chi phí vận hành (OPEX),VNĐ,"6,169,230 VNĐ","4,079,200 VNĐ","-2,090,030 VNĐ (-33.9%)"
+Thời gian giao hàng giờ cao điểm,phút,90.1 phút,60.3 phút,-29.8 phút (-33.0%)
+Tổng chi phí vận hành (OPEX),VNĐ,"6,169,230 VNĐ","4,079,136 VNĐ","-2,090,094 VNĐ (-33.9%)"
 Chi phí trên mỗi bưu kiện,VNĐ/kiện,"2,056 VNĐ","1,359 VNĐ",-696 VNĐ/kiện (-33.9%)
-Phát thải khí nhà kính (CO2),kg CO2,8.63 kg,13.36 kg,--4.73 kg CO2 (--54.8%)
+Phát thải khí nhà kính (CO2),kg CO2,8.63 kg,13.34 kg,--4.71 kg CO2 (--54.6%)

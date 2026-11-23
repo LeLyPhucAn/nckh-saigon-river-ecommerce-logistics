@@ -1,13 +1,16 @@
 """
 Mô hình ra quyết định đa tiêu chí TOPSIS (Giai đoạn 2).
 Chuẩn hóa vector, xác định giải pháp lý tưởng A+, A- và hệ số gần gũi CC_k.
+Nhận dữ liệu trực tiếp từ GIS Ngày 1 và trọng số toàn cục từ Triangular Fuzzy AHP.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
+from src.config import PROCESSED_DATA_DIR
 from src.data_loaders.hub_loader import load_candidate_hubs
 
 
@@ -27,10 +30,14 @@ class TOPSISModel:
     def __init__(
         self, candidate_hubs_df: Optional[pd.DataFrame] = None
     ) -> None:
-        self.hubs_df = (
-            candidate_hubs_df if candidate_hubs_df is not None
-            else load_candidate_hubs()
-        )
+        if candidate_hubs_df is not None:
+            self.hubs_df = candidate_hubs_df.copy()
+        else:
+            gis_path = PROCESSED_DATA_DIR / "gis_candidate_hubs.csv"
+            if gis_path.exists():
+                self.hubs_df = pd.read_csv(gis_path)
+            else:
+                self.hubs_df = load_candidate_hubs()
 
         self.criteria_cols: List[str] = [
             "bridge_clearance_m", "river_depth_m", "ris_readiness_score",
@@ -66,44 +73,72 @@ class TOPSISModel:
         }
 
     def _prepare_decision_matrix(self) -> pd.DataFrame:
-        """Gán các chỉ số phụ tải không gian và an toàn bờ sông cho từng bến."""
+        """
+        Đồng bộ tên cột từ dữ liệu GIS và thông số kỹ thuật thực địa.
+        Loại bỏ hoàn toàn các cấu trúc dictionary gán cứng.
+        """
         df = self.hubs_df.copy()
 
-        condos_map = {
-            "HUB01": 1, "HUB02": 1, "HUB03": 3, "HUB04": 3,
-            "HUB05": 3, "HUB06": 4, "HUB07": 3, "HUB08": 3
-        }
-        malls_map = {
-            "HUB01": 1, "HUB02": 0, "HUB03": 2, "HUB04": 1,
-            "HUB05": 1, "HUB06": 1, "HUB07": 3, "HUB08": 3
-        }
-        road_dens_map = {
-            "HUB01": 14.2, "HUB02": 15.8, "HUB03": 13.5, "HUB04": 19.4,
-            "HUB05": 21.0, "HUB06": 24.5, "HUB07": 28.2, "HUB08": 30.6
-        }
-        pop_map = {
-            "HUB01": 85000, "HUB02": 92000, "HUB03": 78000, "HUB04": 110000,
-            "HUB05": 125000, "HUB06": 165000, "HUB07": 190000, "HUB08": 210000
-        }
-        safety_map = {
-            "HUB01": 4.0, "HUB02": 3.8, "HUB03": 2.2, "HUB04": 4.2,
-            "HUB05": 4.5, "HUB06": 4.8, "HUB07": 5.0, "HUB08": 5.0
-        }
+        # Ánh xạ cột từ GIS sang định dạng chuẩn của TOPSIS
+        if "road_density_1500m_km_per_km2" in df.columns and "road_density_1500m" not in df.columns:
+            df["road_density_1500m"] = df["road_density_1500m_km_per_km2"]
 
-        df["condos_1500m"] = [condos_map[h] for h in df["hub_id"]]
-        df["malls_1500m"] = [malls_map[h] for h in df["hub_id"]]
-        df["road_density_1500m"] = [road_dens_map[h] for h in df["hub_id"]]
-        df["pop_catchment"] = [pop_map[h] for h in df["hub_id"]]
-        df["erosion_safety"] = [safety_map[h] for h in df["hub_id"]]
+        if "population_1500m" in df.columns and "pop_catchment" not in df.columns:
+            df["pop_catchment"] = df["population_1500m"]
+
+        if "erosion_safety_score" in df.columns and "erosion_safety" not in df.columns:
+            df["erosion_safety"] = df["erosion_safety_score"]
+
+        # Đảm bảo đầy đủ các cột tiêu chuẩn
+        for col in self.criteria_cols:
+            if col not in df.columns:
+                raise ValueError(f"Thiếu trường dữ liệu '{col}' trong ma trận quyết định TOPSIS.")
 
         return df
 
+    def derive_weights_from_ahp(
+        self, ahp_global_weights_df: pd.DataFrame
+    ) -> Dict[str, float]:
+        """
+        Chuyển hóa trọng số toàn cục từ Triangular Fuzzy AHP sang 10 tiêu chí TOPSIS.
+        Tạo liên kết chặt chẽ giữa AHP và TOPSIS.
+        """
+        w_map = dict(zip(
+            ahp_global_weights_df["indicator_code"],
+            ahp_global_weights_df["global_weight"]
+        ))
+
+        # Phân bổ trọng số chỉ số AHP vào các tiêu chí đo lường cụ thể của bến
+        raw_weights = {
+            "bridge_clearance_m": w_map.get("NAV1", 0.10) * 0.55,
+            "river_depth_m": w_map.get("NAV1", 0.10) * 0.45,
+            "ris_readiness_score": w_map.get("NAV3", 0.06) * 1.20,
+            "condos_1500m": w_map.get("ECO1", 0.16) * 0.85,
+            "pop_catchment": w_map.get("ECO1", 0.16) * 0.75,
+            "malls_1500m": w_map.get("ECO3", 0.05) * 1.10,
+            "road_density_1500m": w_map.get("ECO3", 0.05) * 1.30,
+            "dist_to_cbd_km": w_map.get("ECO2", 0.09) * 0.90,
+            "est_land_rent_vnd_m2": w_map.get("FIN1", 0.15) * 1.10,
+            "erosion_safety": w_map.get("ENV3", 0.013) * 4.00,
+        }
+
+        total_w = sum(raw_weights.values())
+        return {k: round(v / total_w, 4) for k, v in raw_weights.items()}
+
     def fit(
-        self, custom_weights: Optional[Dict[str, float]] = None
+        self,
+        custom_weights: Optional[Dict[str, float]] = None,
+        ahp_global_weights_df: Optional[pd.DataFrame] = None,
     ) -> TOPSISResult:
         """Chạy thuật toán xếp hạng TOPSIS."""
         df = self._prepare_decision_matrix()
-        weights_dict = self.default_weights.copy()
+
+        # Xác định trọng số
+        if ahp_global_weights_df is not None:
+            weights_dict = self.derive_weights_from_ahp(ahp_global_weights_df)
+        else:
+            weights_dict = self.default_weights.copy()
+
         if custom_weights:
             weights_dict.update(custom_weights)
 
@@ -114,6 +149,8 @@ class TOPSISModel:
         # 1. Chuẩn hóa vector
         raw_mat = df[self.criteria_cols].values.astype(float)
         col_norms = np.sqrt(np.sum(raw_mat ** 2, axis=0))
+        # Tránh chia cho 0
+        col_norms[col_norms == 0] = 1.0
         norm_mat = raw_mat / col_norms
 
         # 2. Nhân trọng số
@@ -136,7 +173,9 @@ class TOPSISModel:
         d_minus = np.sqrt(np.sum((v_mat - a_minus) ** 2, axis=1))
 
         # 5. Hệ số gần gũi tương đối CC_k
-        cc = d_minus / (d_plus + d_minus)
+        denom = d_plus + d_minus
+        denom[denom == 0] = 1e-6
+        cc = d_minus / denom
 
         # 6. Xuất bảng kết quả xếp hạng
         res_cols = [

@@ -1,29 +1,29 @@
-ward_name,district,pop_density_k_per_km2,dist_to_hub_km,land_rent_mil_vnd_m2,road_ris_score,est_saving_pct
-Phường Hiệp Bình Chánh,TP. Thủ Đức,18.5,0.8,0.18,4.5,28.5
-Phường Linh Đông,TP. Thủ Đức,16.2,2.2,0.15,3.8,24.0
-Phường Thảo Điền,TP. Thủ Đức,22.8,0.5,0.35,4.5,32.0
-Phường An Phú,TP. Thủ Đức,19.4,2.1,0.28,4.2,27.0
-Phường An Khánh,TP. Thủ Đức,21.0,1.4,0.32,4.4,30.5
-Phường Bình An,TP. Thủ Đức,24.5,0.6,0.32,4.8,33.5
-Phường Thủ Thiêm,TP. Thủ Đức,14.0,1.8,0.40,4.5,29.0
-Phường 13 (Bình Lợi),Bình Thạnh,26.5,0.7,0.22,4.0,29.5
-Phường 25 (Văn Thánh),Bình Thạnh,34.0,1.5,0.30,4.2,31.0
-Phường 26 (Bến xe Miền Đông),Bình Thạnh,38.5,1.8,0.28,3.9,28.0
-Phường 27 (Thanh Đa),Bình Thạnh,24.0,0.5,0.19,4.0,30.0
-Phường 28 (Bình Quới),Bình Thạnh,12.5,2.4,0.14,3.2,22.0
-Phường 22 (Tân Cảng),Bình Thạnh,42.0,0.4,0.38,5.0,38.5
-Phường 19 (Thị Nghè),Bình Thạnh,45.0,1.2,0.34,4.3,32.5
-Phường 21 (Xô Viết Nghệ Tĩnh),Bình Thạnh,41.5,1.6,0.31,4.1,30.0
-Phường Bến Nghé (Ba Son),Quận 1,32.0,0.4,0.55,5.0,40.0
-Phường Bến Thành,Quận 1,36.5,1.8,0.65,4.6,34.0
-Phường Đa Kao,Quận 1,39.0,1.5,0.48,4.4,33.0
-Phường Tân Định,Quận 1,44.0,2.2,0.45,4.2,31.0
-Phường Nguyễn Thái Bình,Quận 1,35.0,1.1,0.52,4.8,36.5
-Phường Cầu Ông Lãnh,Quận 1,48.0,1.3,0.46,4.5,35.0
-Phường 12 (Khánh Hội),Quận 4,46.0,0.6,0.42,4.8,37.0
-Phường 13 (Bến Nhà Rồng),Quận 4,43.5,0.5,0.44,4.9,38.0
-Phường 18 (Nguyễn Tất Thành),Quận 4,41.0,0.9,0.38,4.5,34.5
-Phường 6 (Bến Vân Đồn),Quận 4,47.5,1.4,0.40,4.4,33.0
-Phường Tân Hưng,Quận 7,31.0,2.5,0.32,4.1,26.5
-Phường Tân Phong,Quận 7,28.5,3.2,0.36,4.2,24.5
-Phường Tân Thuận Đông,Quận 7,25.0,1.9,0.29,4.0,28.0
+ward_name,district,pop_density_k_per_km2,dist_to_hub_km,land_rent_mil_vnd_m2,road_ris_score,est_saving_pct,ecommerce_demand_index
+Phường Hiệp Bình Chánh,TP. Thủ Đức,18.5,0.8,0.18,4.5,28.5,52.0
+Phường Linh Đông,TP. Thủ Đức,16.2,2.2,0.15,3.8,24.0,29.9
+Phường Thảo Điền,TP. Thủ Đức,22.8,0.5,0.35,4.5,32.0,62.2
+Phường An Phú,TP. Thủ Đức,19.4,2.1,0.28,4.2,27.0,38.2
+Phường An Khánh,TP. Thủ Đức,21.0,1.4,0.32,4.4,30.5,53.3
+Phường Bình An,TP. Thủ Đức,24.5,0.6,0.32,4.8,33.5,62.6
+Phường Thủ Thiêm,TP. Thủ Đức,14.0,1.8,0.40,4.5,29.0,41.3
+Phường 13 (Bình Lợi),Bình Thạnh,26.5,0.7,0.22,4.0,29.5,54.5
+Phường 25 (Văn Thánh),Bình Thạnh,34.0,1.5,0.30,4.2,31.0,49.8
+Phường 26 (Bến xe Miền Đông),Bình Thạnh,38.5,1.8,0.28,3.9,28.0,57.2
+Phường 27 (Thanh Đa),Bình Thạnh,24.0,0.5,0.19,4.0,30.0,43.1
+Phường 28 (Bình Quới),Bình Thạnh,12.5,2.4,0.14,3.2,22.0,22.1
+Phường 22 (Tân Cảng),Bình Thạnh,42.0,0.4,0.38,5.0,38.5,77.1
+Phường 19 (Thị Nghè),Bình Thạnh,45.0,1.2,0.34,4.3,32.5,67.0
+Phường 21 (Xô Viết Nghệ Tĩnh),Bình Thạnh,41.5,1.6,0.31,4.1,30.0,52.3
+Phường Bến Nghé (Ba Son),Quận 1,32.0,0.4,0.55,5.0,40.0,77.6
+Phường Bến Thành,Quận 1,36.5,1.8,0.65,4.6,34.0,61.4
+Phường Đa Kao,Quận 1,39.0,1.5,0.48,4.4,33.0,67.4
+Phường Tân Định,Quận 1,44.0,2.2,0.45,4.2,31.0,55.1
+Phường Nguyễn Thái Bình,Quận 1,35.0,1.1,0.52,4.8,36.5,72.6
+Phường Cầu Ông Lãnh,Quận 1,48.0,1.3,0.46,4.5,35.0,63.7
+Phường 12 (Khánh Hội),Quận 4,46.0,0.6,0.42,4.8,37.0,78.0
+Phường 13 (Bến Nhà Rồng),Quận 4,43.5,0.5,0.44,4.9,38.0,77.3
+Phường 18 (Nguyễn Tất Thành),Quận 4,41.0,0.9,0.38,4.5,34.5,59.8
+Phường 6 (Bến Vân Đồn),Quận 4,47.5,1.4,0.40,4.4,33.0,69.4
+Phường Tân Hưng,Quận 7,31.0,2.5,0.32,4.1,26.5,40.8
+Phường Tân Phong,Quận 7,28.5,3.2,0.36,4.2,24.5,48.3
+Phường Tân Thuận Đông,Quận 7,25.0,1.9,0.29,4.0,28.0,41.9

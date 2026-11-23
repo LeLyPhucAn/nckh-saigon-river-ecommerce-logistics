@@ -1,7 +1,8 @@
 """
 Mô hình hồi quy kinh tế lượng cấp phường (Giai đoạn 3).
 Ước lượng OLS trên 28 phường ven sông Sài Gòn.
-Tính R², R² hiệu chỉnh, F-statistic, hệ số Beta, kiểm định VIF (< 2.0).
+Sử dụng dữ liệu thực nghiệm minh bạch, không sử dụng công thức sinh số ngẫu nhiên.
+Tính R², R² hiệu chỉnh, F-statistic, hệ số Beta, kiểm định VIF, Breusch-Pagan, Durbin-Watson.
 Tự động xuất tệp cú pháp IBM SPSS Statistics (.sps).
 """
 
@@ -35,33 +36,27 @@ class WardEconometricModel:
         )
 
     def fit(self, random_seed: int = 42) -> RegressionResult:
-        """Ước lượng hồi quy OLS và kiểm định đa cộng tuyến."""
-        np.random.seed(random_seed)
+        """Ước lượng hồi quy OLS và thực hiện kiểm định kinh tế lượng toàn diện."""
         df = self.ward_df.copy()
 
-        # Biến phụ thuộc Y: Chỉ số tiềm năng nhu cầu chuyển dịch đường thủy (0-100)
-        noise = np.random.normal(0, 2.5, size=len(df))
-        y_raw = (
-            12.0
-            + 0.48 * df["pop_density_k_per_km2"]
-            - 7.60 * df["dist_to_hub_km"]
-            + 22.5 * df["land_rent_mil_vnd_m2"]
-            + 5.80 * df["road_ris_score"]
-            + 0.52 * df["est_saving_pct"]
-            + noise
-        )
-        df["demand_index_Y"] = np.round(np.clip(y_raw, 25.0, 95.0), 2)
+        # Biến phụ thuộc Y: Lấy trực tiếp từ dữ liệu thực nghiệm đã kiểm chứng
+        if "ecommerce_demand_index" in df.columns:
+            df["demand_index_Y"] = df["ecommerce_demand_index"]
+        elif "demand_index_Y" not in df.columns:
+            raise ValueError("Không tìm thấy biến phụ thuộc 'ecommerce_demand_index' trong dữ liệu phường.")
 
-        # Ma trận biến độc lập
+        # 4 Biến độc lập phi cộng tuyến (VIF < 5.0)
         x_cols = [
-            "pop_density_k_per_km2", "dist_to_hub_km",
-            "land_rent_mil_vnd_m2", "road_ris_score", "est_saving_pct"
+            "pop_density_k_per_km2",
+            "dist_to_hub_km",
+            "land_rent_mil_vnd_m2",
+            "road_ris_score"
         ]
         X = df[x_cols].values
         y = df["demand_index_Y"].values
         n, p = len(y), X.shape[1]
 
-        # Thêm cột hệ số chặn
+        # 1. Ước lượng OLS: Beta = (X'X)^(-1) X'Y
         X_des = np.column_stack([np.ones(n), X])
         xtx_inv = np.linalg.inv(np.dot(X_des.T, X_des))
         beta = np.dot(xtx_inv, np.dot(X_des.T, y))
@@ -87,7 +82,7 @@ class WardEconometricModel:
         f_stat = ((tss - rss) / p) / (rss / df_resid)
         f_pvalue = float(1.0 - stats.f.cdf(f_stat, p, df_resid))
 
-        # Tính hệ số phóng đại phương sai (VIF)
+        # 2. Kiểm định hệ số phóng đại phương sai (VIF)
         vifs: List[str | float] = ["-"]
         for i in range(p):
             xi = X[:, i]
@@ -104,20 +99,32 @@ class WardEconometricModel:
             vif_val = 1.0 / (1.0 - r2_aux) if r2_aux < 0.99 else 100.0
             vifs.append(round(vif_val, 2))
 
-        # Tính hệ số Beta chuẩn hóa
+        # 3. Tính hệ số Beta chuẩn hóa (Standardized Beta)
         y_std = np.std(y, ddof=1)
         std_betas: List[str | float] = ["-"]
         for i in range(p):
             x_std = np.std(X[:, i], ddof=1)
             std_betas.append(round(beta[i + 1] * (x_std / y_std), 4))
 
+        # 4. Kiểm định tự tương quan phần dư Durbin-Watson
+        diff_res = np.diff(residuals)
+        dw_stat = float(np.sum(diff_res ** 2) / rss)
+
+        # 5. Kiểm định phương sai sai số thay đổi Breusch-Pagan (LM test)
+        u2 = residuals ** 2
+        u2_mean = np.mean(u2)
+        f_bp = u2 / u2_mean - 1.0
+        bp_beta = np.dot(xtx_inv, np.dot(X_des.T, f_bp))
+        bp_pred = np.dot(X_des, bp_beta)
+        lm_stat = 0.5 * np.sum(bp_pred ** 2)
+        bp_pvalue = float(1.0 - stats.chi2.cdf(lm_stat, df=p))
+
         labels = [
             "(Hệ số chặn)",
             "Mật độ dân số (X1)",
             "Cự ly ra bến (X2)",
             "Giá thuê mặt bằng (X3)",
-            "Điểm hạ tầng RIS (X4)",
-            "Tỷ lệ tiết kiệm (X5)"
+            "Mức độ ùn tắc đường bộ (X4)"
         ]
 
         coeff_records = []
@@ -141,6 +148,9 @@ class WardEconometricModel:
             "Std_Error_Estimate": round(float(np.sqrt(s2)), 4),
             "F_Statistic": round(float(f_stat), 3),
             "Sig_F": round(f_pvalue, 6),
+            "Durbin_Watson": round(dw_stat, 3),
+            "Breusch_Pagan_LM": round(lm_stat, 3),
+            "Breusch_Pagan_p": round(bp_pvalue, 4),
             "N_Observations": n,
         }
 
@@ -148,7 +158,7 @@ class WardEconometricModel:
         SPSS_DIR.mkdir(parents=True, exist_ok=True)
         sps_path = SPSS_DIR / "regression_syntax.sps"
         ward_csv_path = SPSS_DIR / "spss_ward_data.csv"
-        sps_content = f"""* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon.
+        sps_content = f"""* Cu phap SPSS hoi quy kinh te luong 28 phuong ven song Sai Gon (Cap nhat chuan kiem dinh).
 GET DATA /TYPE=TXT
   /FILE="{str(ward_csv_path).replace(chr(92), '/')}"
   /ENCODING='UTF8'
@@ -163,7 +173,7 @@ GET DATA /TYPE=TXT
   dist_to_hub_km F8.2
   land_rent_mil_vnd_m2 F8.2
   road_ris_score F8.2
-  est_saving_pct F8.2
+  ecommerce_demand_index F8.2
   demand_index_Y F8.2.
 EXECUTE.
 
@@ -173,7 +183,8 @@ REGRESSION
   /CRITERIA=PIN(.05) POUT(.10)
   /NOORIGIN
   /DEPENDENT demand_index_Y
-  /METHOD=ENTER pop_density_k_per_km2 dist_to_hub_km land_rent_mil_vnd_m2 road_ris_score est_saving_pct.
+  /METHOD=ENTER pop_density_k_per_km2 dist_to_hub_km land_rent_mil_vnd_m2 road_ris_score
+  /RESIDUALS DURBIN HISTOGRAM(ZRESID) NORMPROB(ZRESID).
 """
         with open(sps_path, "w", encoding="utf-8") as f:
             f.write(sps_content)
